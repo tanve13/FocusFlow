@@ -1,6 +1,5 @@
 package com.tanveer.focusflow.data.firestore
 
-import com.tanveer.focusflow.model.FocusSession
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tanveer.focusflow.data.model.FocusSession
 import kotlinx.coroutines.tasks.await

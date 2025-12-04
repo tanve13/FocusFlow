@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.tanveer.focusflow.UserInterface.navigation.Screen
-import com.tanveer.focusflow.ui.navigation.Screen
 
 data class BottomItem(val route: String, val icon: ImageVector, val title: String)
 
@@ -33,7 +32,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         navController.navigate(item.route) {
                             launchSingleTop = true
                             restoreState = true
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            popUpTo(Screen.Home.route) { saveState = true }
                         }
                     }
                 },

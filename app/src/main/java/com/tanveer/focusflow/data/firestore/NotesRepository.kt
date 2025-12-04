@@ -1,13 +1,16 @@
 package com.tanveer.focusflow.data.firestore
 
-
-import com.tanveer.focusflow.model.Note
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tanveer.focusflow.data.model.Note
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class NotesRepository(private val db: FirebaseFirestore = FirebaseFirestore.getInstance()) {
-    fun notesCollection(uid: String) = db.collection("notes").document(uid).collection("userNotes")
+@Singleton
+class NotesRepository @Inject constructor(
+    private val db: FirebaseFirestore
+) {
+    private fun notesCollection(uid: String) = db.collection("notes").document(uid).collection("userNotes")
 
     suspend fun createNote(uid: String, note: Note) {
         val doc = notesCollection(uid).document()
@@ -22,6 +25,6 @@ class NotesRepository(private val db: FirebaseFirestore = FirebaseFirestore.getI
         notesCollection(uid).document(noteId).delete().await()
     }
 
-    suspend fun getNotes(uid: String) =
+    suspend fun getNotes(uid: String): List<Note> =
         notesCollection(uid).get().await().documents.mapNotNull { it.toObject(Note::class.java) }
 }

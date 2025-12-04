@@ -1,11 +1,14 @@
 package com.tanveer.focusflow.data.firestore
 
 
-import com.tanveer.focusflow.model.Task
 import com.google.firebase.firestore.FirebaseFirestore
+import com.tanveer.focusflow.data.model.Task
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class TaskRepository(private val db: FirebaseFirestore = FirebaseFirestore.getInstance()) {
+class TaskRepository @Inject constructor(
+    private val db: FirebaseFirestore
+) {
     fun tasksCollection(uid: String) = db.collection("tasks").document(uid).collection("userTasks")
 
     suspend fun addTask(uid: String, task: Task) {
@@ -24,3 +27,4 @@ class TaskRepository(private val db: FirebaseFirestore = FirebaseFirestore.getIn
     suspend fun getAllTasks(uid: String) =
         tasksCollection(uid).get().await().documents.mapNotNull { it.toObject(Task::class.java) }
 }
+
