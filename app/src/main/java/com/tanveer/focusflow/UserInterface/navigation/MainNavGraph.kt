@@ -13,7 +13,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.tanveer.focusflow.R
 import com.tanveer.focusflow.UserInterface.navigation.Screen
+import com.tanveer.focusflow.UserInterface.screens.achievements.AchievementScreen
 import com.tanveer.focusflow.UserInterface.screens.home.HomeScreen
 import com.tanveer.focusflow.UserInterface.screens.tasks.TaskScreen
 import com.tanveer.focusflow.UserInterface.screens.notes.NotesScreen
@@ -22,6 +24,7 @@ import com.tanveer.focusflow.UserInterface.screens.music.AmbientSoundScreen
 import com.tanveer.focusflow.UserInterface.screens.profile.EditProfileScreen
 import com.tanveer.focusflow.UserInterface.screens.profile.ProfileScreen
 import com.tanveer.focusflow.UserInterface.screens.settings.SettingsScreen
+import com.tanveer.focusflow.data.model.Badge
 import com.tanveer.focusflow.ui.components.BottomNavigationBar
 import com.tanveer.focusflow.ui.components.SideSlider
 
@@ -29,8 +32,6 @@ import com.tanveer.focusflow.ui.components.SideSlider
 fun MainNavGraph(navController: NavHostController) {
 
     val innerNavController = rememberNavController()
-    var sliderVisible by remember { mutableStateOf(false) }
-
     Scaffold(bottomBar = { BottomNavigationBar(innerNavController) }) { padding ->
         NavHost(
             navController = innerNavController,
@@ -44,7 +45,6 @@ fun MainNavGraph(navController: NavHostController) {
                 )
             }
             composable("profile") { ProfileScreen(
-                navToEdit = { innerNavController.navigate("editProfile") },
                 navToLogin = { navController.navigate("login") }
             )}
 
@@ -52,7 +52,27 @@ fun MainNavGraph(navController: NavHostController) {
                 navBack = { innerNavController.popBackStack() }
             )}
             composable("settings") {
-                SettingsScreen()     // ← Ye tum banane wali ho
+                SettingsScreen(navBack = { navController.popBackStack() })     // ← Ye tum banane wali ho
+            }
+            composable("achievements") {
+                // Dummy badges and stats
+                val badges = listOf(
+                    Badge("1", "Consistency Starter", "Maintain a 7-day streak", R.drawable.img, unlocked = true, progress = 1f),
+                    Badge("2", "Focus Warrior", "Complete a 30-day streak", R.drawable.img, unlocked = false, progress = 0.5f)
+                )
+                val streak = 10
+                val todaySessions = 5
+                val totalSessions = 120
+                val totalMinutes = 600
+                AchievementScreen(
+                    badges = badges,
+                    streak = streak,
+                    todaySessions = todaySessions,
+                    totalSessions = totalSessions,
+                    totalMinutes = totalMinutes,
+                    navBack = { navController.popBackStack() },
+                    onShare = {}
+                )
             }
             composable(Screen.Tasks.route) { TaskScreen(uid = "current_uid") }
             composable(Screen.Notes.route) { NotesScreen(uid = "current_uid") }
@@ -64,14 +84,10 @@ fun MainNavGraph(navController: NavHostController) {
         SideSlider(
             visible = sliderVisible,
             onClose = { sliderVisible = false },
-            openProfile = {
-                sliderVisible = false
-                navController.navigate("profile")
-            },
-            openSettings = {
-                sliderVisible = false
-                navController.navigate("settings")
-            }
+            openProfile = { navController.navigate("profile") },
+            openSettings = { navController.navigate("settings") },
+            openAchievements = { innerNavController.navigate("achievements") }
         )
+
     }
 }

@@ -6,6 +6,7 @@ data class User(
     val email: String = "",
     val photoUrl: String? = null,
     val streak: Int = 0,
-    val totalSessions: Int = 0
+    val totalSessions: Int = 0,
+     val bio : String = ""
 )
 

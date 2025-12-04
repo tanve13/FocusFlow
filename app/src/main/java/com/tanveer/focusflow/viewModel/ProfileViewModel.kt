@@ -31,6 +31,15 @@ class ProfileViewModel @Inject constructor(
             onComplete()
         }
     }
+    fun updateProfile(uid: String, name: String, bio: String) {
+        viewModelScope.launch {
+            val updated = user.value?.copy(name = name, bio = bio)
+            if (updated != null) {
+                repo.updateUser(uid, updated)
+                _user.value = updated
+            }
+        }
+    }
 
     fun logout(onLogout: () -> Unit) {
         repo.logout()

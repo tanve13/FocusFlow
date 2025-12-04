@@ -14,10 +14,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun SideSlider(visible: Boolean, onClose: () -> Unit, openProfile: () -> Unit = {}, openSettings: () -> Unit = {}) {
+fun SideSlider(visible: Boolean,
+               onClose: () -> Unit,
+               openProfile: () -> Unit = {},
+               openSettings: () -> Unit = {},
+               openAchievements: () -> Unit = {}) {
+    val scope = rememberCoroutineScope() // create coroutine scope
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(180)) + slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
@@ -48,9 +58,18 @@ fun SideSlider(visible: Boolean, onClose: () -> Unit, openProfile: () -> Unit = 
                 Text("Tap below to open profile or settings", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                 Spacer(Modifier.height(16.dp))
 
-                SliderRow(text = "View Profile") { openProfile() }
-                SliderRow(text = "Settings") { openSettings() }
-                SliderRow(text = "Achievements") { /* navigate */ }
+                SliderRow(text = "View Profile") { onClose()
+                    openProfile() }
+                SliderRow(text = "Settings") { onClose()
+                    openSettings() }
+                SliderRow(text = "Achievements") {
+                    println("Achievements clicked")
+                    scope.launch {
+                        onClose()
+                        delay(300) // wait for exit animation
+                        println("Navigating to achievements")
+                        openAchievements()
+                    }                    }
                 Spacer(modifier = Modifier.weight(1f))
                 Button(onClick = { /* logout */ }, modifier = Modifier.fillMaxWidth()) { Text("Logout") }
             }
