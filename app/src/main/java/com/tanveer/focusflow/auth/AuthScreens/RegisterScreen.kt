@@ -50,124 +50,141 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    val authViewModel: AuthViewModel = viewModel()
-    val error by authViewModel.error.collectAsState()
 
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val authViewModel: AuthViewModel = viewModel()
+    val error by authViewModel.error.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7FB))
-            .padding(20.dp)
+            .background(Color(0xFF6C63FF)),
+        contentAlignment = Alignment.Center
     ) {
 
-        Column {
-            Spacer(Modifier.height(40.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        ) {
 
-            Text(
-                text = "Create Account",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF2D2D2D)
-            )
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-            Spacer(Modifier.height(6.dp))
+                // 🔵 App icon on top
+                Icon(
+                    imageVector = Icons.Default.Visibility, // Change to your FocusFlow icon
+                    contentDescription = "App Icon",
+                    tint = Color(0xFF6C63FF),
+                    modifier = Modifier.size(60.dp)
+                )
 
-            Text(
-                text = "Join FocusFlow and improve productivity",
-                color = Color.Gray
-            )
+                Spacer(Modifier.height(15.dp))
 
-            Spacer(Modifier.height(30.dp))
+                Text(
+                    text = "Create Account",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color(0xFF2D2D2D)
+                )
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Full Name") }
-            )
+                Spacer(Modifier.height(6.dp))
 
-            Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "Join FocusFlow and improve productivity",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Email") }
-            )
+                Spacer(Modifier.height(25.dp))
 
-            Spacer(Modifier.height(14.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Full Name") }
+                )
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Password") },
-                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val icon = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                        Icon(imageVector = icon, contentDescription = if (isPasswordVisible) "Hide password" else "Show password")
+                Spacer(Modifier.height(14.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Email") }
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Password") },
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                            Icon(
+                                imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = "Toggle Password"
+                            )
+                        }
                     }
-                }
-            )
+                )
 
-            Spacer(Modifier.height(25.dp))
+                Spacer(Modifier.height(25.dp))
 
-            Button(
-                onClick = {
-                    val trimmedName = name.trim()
-                    val trimmedEmail = email.trim()
-                    val trimmedPassword = password.trim()
+                Button(
+                    onClick = {
+                        val trimmedName = name.trim()
+                        val trimmedEmail = email.trim()
+                        val trimmedPassword = password.trim()
 
-                    when {
-                        trimmedName.isBlank() -> {
-                            Toast.makeText(context, "Please enter your name", Toast.LENGTH_SHORT).show()
-                        }
-                        trimmedEmail.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches() -> {
-                            Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
-                        }
-                        trimmedPassword.length < 6 -> {
-                            Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                        }
-                        else -> {
-                            authViewModel.register(trimmedName, trimmedEmail, trimmedPassword) {
-                                Toast.makeText(context, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                        when {
+                            trimmedName.isBlank() ->
+                                Toast.makeText(context, "Please enter your name", Toast.LENGTH_SHORT).show()
+
+                            trimmedEmail.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches() ->
+                                Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+
+                            trimmedPassword.length < 6 ->
+                                Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+
+                            else -> {
+                                authViewModel.register(trimmedName, trimmedEmail, trimmedPassword) {
+                                    Toast.makeText(context, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
-                    }
-                },
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C63FF))
+                ) {
                     Text("Create Account", color = Color.White)
                 }
-            }
 
+                Spacer(Modifier.height(15.dp))
 
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Already have an account?", color = Color.Gray)
-                Spacer(modifier = Modifier.width(4.dp))
-                TextButton(onClick = onLoginClick) {
-                    Text("Login", color = Color(0xFF6C63FF))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Already have an account?", color = Color.Gray)
+                    Spacer(Modifier.width(4.dp))
+                    TextButton(onClick = onLoginClick) {
+                        Text("Login", color = Color(0xFF6C63FF))
+                    }
                 }
             }
         }
     }
 }
+
 
