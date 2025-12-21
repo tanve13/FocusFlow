@@ -2,12 +2,14 @@ package com.tanveer.focusflow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// LIGHT
+val BW_White = Color(0xFFFFFFFF)
+val BW_OffWhite = Color(0xFFF5F5F5)
+val BW_Black = Color(0xFF000000)
+val BW_Grey = Color(0xFF6E6E6E)
+val BW_LightGrey = Color(0xFFBDBDBD)
 
-// Polished Calm Palette
-val Purple700 = Color(0xFF5B21B6)   // Primary (Focus)
-val Teal400   = Color(0xFF14B8A6)   // Accent (Break / action)
-val Navy900   = Color(0xFF0B1220)   // Background dark
-val Surface00 = Color(0xFF0F1724)
-val Pink300   = Color(0xFFFB7185)   // Accent 2 / error
-val SoftGray   = Color(0xFF94A3B8)
-val White00    = Color(0xFFFFFFFF)
+// DARK
+val BW_Dark = Color(0xFF0E0E0E)
+val BW_SurfaceDark = Color(0xFF1A1A1A)
+val BW_GreyDark = Color(0xFF9E9E9E)

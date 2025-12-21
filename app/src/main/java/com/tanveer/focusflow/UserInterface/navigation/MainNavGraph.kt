@@ -3,15 +3,10 @@ package com.tanveer.focusflow.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.tanveer.focusflow.R
 import com.tanveer.focusflow.UserInterface.navigation.Screen
@@ -26,7 +21,6 @@ import com.tanveer.focusflow.UserInterface.screens.profile.ProfileScreen
 import com.tanveer.focusflow.UserInterface.screens.settings.SettingsScreen
 import com.tanveer.focusflow.data.model.Badge
 import com.tanveer.focusflow.ui.components.BottomNavigationBar
-import com.tanveer.focusflow.ui.components.SideSlider
 
 @Composable
 fun MainNavGraph(navController: NavHostController) {
@@ -79,15 +73,7 @@ fun MainNavGraph(navController: NavHostController) {
             composable(Screen.Insights.route) { InsightsScreen() }
             composable(Screen.Music.route) { AmbientSoundScreen(onBack = { innerNavController.popBackStack() }) }
         }
-        var sliderVisible by remember { mutableStateOf(false) }
 
-        SideSlider(
-            visible = sliderVisible,
-            onClose = { sliderVisible = false },
-            openProfile = { navController.navigate("profile") },
-            openSettings = { navController.navigate("settings") },
-            openAchievements = { innerNavController.navigate("achievements") }
-        )
 
     }
 }

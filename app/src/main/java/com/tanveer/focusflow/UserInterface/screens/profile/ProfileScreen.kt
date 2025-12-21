@@ -1,7 +1,10 @@
 package com.tanveer.focusflow.UserInterface.screens.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -12,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.tanveer.focusflow.viewModel.ProfileViewModel
 import com.tanveer.focusflow.R
 
@@ -28,6 +33,12 @@ fun ProfileScreen(
 ) {
     val user by vm.user.collectAsState()
     var showEditDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { vm.uploadProfileImage(context, it, uid) }
+    }
 
     LaunchedEffect(Unit) { vm.loadUser(uid) }
 
@@ -48,15 +59,18 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // Avatar
             Image(
-                painter = painterResource(id = R.drawable.baseline_person_24),
+                painter = if (!user?.photoUrl.isNullOrEmpty())
+                    rememberAsyncImagePainter(user!!.photoUrl)
+                else
+                    painterResource(R.drawable.baseline_person_24),
                 contentDescription = "Profile Avatar",
                 modifier = Modifier
                     .size(110.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray)
+                    .clickable { imagePicker.launch("image/*") } // click to pick
             )
+
 
             Spacer(Modifier.height(12.dp))
 

@@ -1,5 +1,8 @@
 package com.tanveer.focusflow.viewModel
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tanveer.focusflow.data.firestore.UserRepository
@@ -37,6 +40,20 @@ class ProfileViewModel @Inject constructor(
             if (updated != null) {
                 repo.updateUser(uid, updated)
                 _user.value = updated
+            }
+        }
+    }
+    fun uploadProfileImage(context: Context, imageUri: Uri, uid: String) {
+        viewModelScope.launch {
+            try {
+                val url = repo.uploadProfileImage(context, imageUri, uid)
+                val updated = user.value?.copy(photoUrl = url)
+                if (updated != null) {
+                    repo.updateUser(uid, updated)
+                    _user.value = updated
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileVM", "Image upload failed", e)
             }
         }
     }

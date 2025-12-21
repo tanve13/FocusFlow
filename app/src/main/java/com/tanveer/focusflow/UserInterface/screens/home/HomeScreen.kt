@@ -17,52 +17,55 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.tanveer.focusflow.ui.components.SideSlider
 import com.tanveer.focusflow.viewModel.HomeViewModel
 import com.tanveer.focusflow.viewModel.TaskViewModel
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.navigation.NavHostController
+import com.tanveer.focusflow.ui.components.SideSlider
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
+    navController: NavHostController,
     onOpenMusic: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+    val colors = MaterialTheme.colorScheme
     val isRunning by homeViewModel.isRunning.collectAsState()
     val isFocus by homeViewModel.isFocusMode.collectAsState()
     val timeLeft by homeViewModel.timeLeftSec.collectAsState()
-    val showBreathing = isRunning && isFocus
+    val totalSec =
+        if (isFocus) homeViewModel.currentFocusSec()
+        else homeViewModel.currentBreakSec()
     var sliderVisible by remember { mutableStateOf(false) }
-
-    val totalSec = if (isFocus) homeViewModel.currentFocusSec() else homeViewModel.currentBreakSec()
     val progress = 1f - (timeLeft.toFloat() / totalSec.toFloat())
-
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 500),
+        label = "timerProgress"
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.background)
             .verticalScroll(rememberScrollState())
-            .background(Color(0xFFF7F7FB))
             .padding(16.dp)
     ) {
 
-        // ===================== Top Bar with Gradient =====================
+        // ===================== HEADER =====================
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(Color(0xFF6C63FF), Color(0xFF8A84FF))
-                    )
-                )
+                .background(colors.primary)
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -71,88 +74,108 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Profile Icon on left
+
                 IconButton(
                     onClick = { sliderVisible = true },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                        .background(colors.onPrimary.copy(alpha = 0.15f), CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Profile",
-                        tint = Color.White
+                        contentDescription = null,
+                        tint = colors.onPrimary
                     )
                 }
 
                 Text(
                     text = if (isFocus) "Focus Time" else "Break",
-                    color = Color.White,
+                    color = colors.onPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.width(40.dp)) // Placeholder for right side
+                Spacer(modifier = Modifier.width(40.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // ===================== Timer Section =====================
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+        // ===================== TIMER =====================
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(6.dp)
         ) {
-            BreathingAnimation(visible = showBreathing)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
 
-            CircularProgressIndicator(
-                progress = progress.coerceIn(0f, 1f),
-                modifier = Modifier.size(200.dp),
-                strokeWidth = 12.dp,
-                color = Color(0xFF6C63FF)
-            )
-            Text(
-                text = formatTime(timeLeft),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isFocus) Color(0xFF6C63FF) else Color(0xFF8A84FF)
-            )
+                CircularProgressIndicator(
+                    progress = animatedProgress,
+                    modifier = Modifier.size(200.dp),
+                    strokeWidth = 12.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                )
+
+                Text(
+                    text = formatTime(timeLeft),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
+        Spacer(Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ===================== Controls Row =====================
+        // ===================== CONTROLS =====================
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            ControlButton(
+            ControlIcon(
                 icon = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                description = "Start",
                 onClick = { homeViewModel.toggleStartStop() }
             )
-
-            ControlButton(
+            ControlIcon(
                 icon = Icons.Default.RestartAlt,
-                description = "Reset",
                 onClick = { homeViewModel.resetTimer() }
             )
-
-            ControlButton(
+            ControlIcon(
                 icon = Icons.Default.MusicNote,
-                description = "Music",
                 onClick = onOpenMusic
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // ===================== Quote Section =====================
-        QuoteSection()
+        // ===================== QUOTE CARD (AS YOU WANT) =====================
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = colors.surface),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Text(
+                text = "Small steps every day lead to big focus 🤍",
+                modifier = Modifier.padding(16.dp),
+                color = colors.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // ===================== Today Tasks =====================
+        // ===================== TASKS =====================
         TodayTasksPreview()
     }
     SideSlider(
@@ -164,61 +187,71 @@ fun HomeScreen(
         },
         openSettings = {
             sliderVisible = false
-
             navController.navigate("settings")
+        },
+        openAchievements = {
+            sliderVisible = false
+            navController.navigate("achievements")
         }
     )
-}
 
+}
 @Composable
-fun ControlButton(icon: androidx.compose.ui.graphics.vector.ImageVector, description: String, onClick: () -> Unit) {
+fun ControlIcon(icon: ImageVector, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+
     IconButton(
         onClick = onClick,
         modifier = Modifier
             .size(64.dp)
-            .background(Color(0xFF6C63FF).copy(alpha = 0.1f), CircleShape)
+            .background(colors.primary.copy(alpha = 0.08f), CircleShape)
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = description,
-            tint = Color(0xFF6C63FF),
+            contentDescription = null,
+            tint = colors.primary,
             modifier = Modifier.size(32.dp)
         )
     }
 }
 
-
 @Composable
-fun TodayTasksPreview(taskVm: TaskViewModel = hiltViewModel(), uid: String = "current_uid") {
+fun TodayTasksPreview(taskVm: TaskViewModel = hiltViewModel(),
+                      uid: String = "current_uid") {
+    val colors = MaterialTheme.colorScheme
     val tasks by taskVm.tasks.collectAsState()
     LaunchedEffect(Unit) { taskVm.loadTasks(uid) }
+    Column {
+        Text(
+            "Today's Tasks",
+            fontWeight = FontWeight.Bold,
+            color = colors.onBackground
+        )
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 0.dp)) {
-        Text("Today's Tasks", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+        Spacer(Modifier.height(8.dp))
+
         tasks.take(3).forEach { t ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
+                elevation = CardDefaults.cardElevation(3.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
+                    modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = t.completed,
-                        onCheckedChange = { taskVm.updateTask(uid, t.copy(completed = !t.completed)) }
+                        onCheckedChange = { }
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(t.title, maxLines = 1, fontWeight = FontWeight.Medium)
-                        if (t.description.isNotBlank()) Text(t.description, style = MaterialTheme.typography.bodySmall)
-                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        t.title,
+                        color = colors.onSurface
+                    )
                 }
             }
         }

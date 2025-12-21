@@ -1,29 +1,45 @@
 package com.tanveer.focusflow.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import androidx.compose.material3.*
 
-private val LightColors = lightColorScheme(
-    primary = Purple700,
-    onPrimary = White00,
-    secondary = Teal400,
-    surface = White00,
-    background = White00,
-    onBackground = Navy900,
-    error = Pink300
+val LightColors = lightColorScheme(
+    primary = BW_Black,
+    secondary = BW_Grey,
+
+    background = BW_OffWhite,
+    surface = BW_White,
+
+    onPrimary = BW_White,
+    onSecondary = BW_White,
+
+    onBackground = BW_Black,
+    onSurface = BW_Black,
+
+    outline = BW_LightGrey
 )
 
-private val DarkColors = darkColorScheme(
-    primary = Purple700,
-    onPrimary = White00,
-    secondary = Teal400,
-    surface = Surface00,
-    background = Navy900,
-    onBackground = White00,
-    error = Pink300
+val DarkColors = darkColorScheme(
+    primary = BW_White,
+    secondary = BW_GreyDark,
+
+    background = BW_Dark,
+    surface = BW_SurfaceDark,
+
+    onPrimary = BW_Black,
+    onSecondary = BW_Black,
+
+    onBackground = BW_White,
+    onSurface = BW_White,
+
+    outline = BW_GreyDark
 )
+
+
 
 @Composable
 fun FocusFlowTheme(

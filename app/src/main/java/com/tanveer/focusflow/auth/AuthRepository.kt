@@ -1,6 +1,7 @@
 package com.tanveer.focusflow.auth
 
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -18,7 +19,8 @@ class AuthRepository(
                 val userData = mapOf(
                     "uid" to uid,
                     "name" to name,
-                    "email" to email
+                    "email" to email,
+                    "photoUrl" to ""
                 )
 
                 db.collection("users").document(uid).set(userData)
@@ -31,10 +33,16 @@ class AuthRepository(
 
     // LOGIN USER
     fun login(email: String, pass: String, onDone: (Boolean, String?) -> Unit) {
-        auth.signInWithEmailAndPassword(email, pass)
+        auth.signInWithEmailAndPassword(
+            email.trim(),
+            pass.trim()
+        )
             .addOnSuccessListener { onDone(true, null) }
             .addOnFailureListener { e -> onDone(false, e.message) }
+        Log.d("AUTH_DEBUG", "Email = '$email'")
+
     }
+
 
     // FORGOT PASSWORD
     fun forgotPassword(email: String, onDone: (Boolean, String?) -> Unit) {

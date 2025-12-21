@@ -44,81 +44,43 @@ fun AchievementScreen(
     navBack: () -> Unit
 ) {
 
-    val badges = listOf(
-        Badge(
-            "1",
-            "Consistency Starter",
-            "Maintain a 7-day streak",
-            R.drawable.img,
-            unlocked = streak >= 7,
-            progress = (streak / 7f).coerceAtMost(1f)
-        ),
-        Badge(
-            "2",
-            "Focus Warrior",
-            "Complete a 30-day streak",
-            R.drawable.img,
-            unlocked = streak >= 30
-        ),
-        Badge(
-            "3",
-            "Master of Discipline",
-            "Achieve a 50-day streak",
-            R.drawable.img,
-            unlocked = streak >= 50
-        ),
-        Badge(
-            "4",
-            "Daily Grinder",
-            "Finish 10 sessions in a single day",
-            R.drawable.img,
-            unlocked = todaySessions >= 10
-        ),
-        Badge(
-            "5",
-            "Century Achiever",
-            "Complete 100 focus sessions",
-            R.drawable.img,
-            unlocked = totalSessions >= 100
-        ),
-        Badge(
-            "6",
-            "Time Investor",
-            "Reach 500 minutes of focus time",
-            R.drawable.img,
-            unlocked = totalMinutes >= 500
-        )
+    val finalBadges = listOf(
+        Badge("1", "Consistency Starter", "Maintain a 7-day streak", R.drawable.img, streak >= 7, (streak / 7f).coerceAtMost(1f)),
+        Badge("2", "Focus Warrior", "Complete a 30-day streak", R.drawable.img, streak >= 30),
+        Badge("3", "Master of Discipline", "Achieve a 50-day streak", R.drawable.img, streak >= 50),
+        Badge("4", "Daily Grinder", "Finish 10 sessions in a single day", R.drawable.img, todaySessions >= 10),
+        Badge("5", "Century Achiever", "Complete 100 focus sessions", R.drawable.img, totalSessions >= 100),
+        Badge("6", "Time Investor", "Reach 500 minutes of focus time", R.drawable.img, totalMinutes >= 500)
     )
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Achievements") },
+                title = { Text("Achievements", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = navBack) {
-                        Icon(Icons.Filled.Lock, contentDescription = "Back")
+                        Icon(Icons.Default.Lock, null, tint = Color.White)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Black
+                )
             )
-        }
+        },
+        containerColor = Color.Black
     ) { padding ->
 
-        Column(
-            Modifier
-                .padding(padding)
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .background(Color.White)
+                .padding(padding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // HEADER GRADIENT
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(listOf(Color.Black, Color(0xFF202020)))
-                    )
-                    .padding(20.dp)
-            ) {
+            // 🔥 HEADER
+            item {
                 Column {
                     Text(
                         "Your Achievements",
@@ -128,96 +90,75 @@ fun AchievementScreen(
                     )
                     Text(
                         "Unlock badges by staying consistent!",
-                        color = Color.White.copy(0.8f)
+                        color = Color.White.copy(0.7f)
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 50.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                items(badges) { badge ->
-                    BadgeCard(badge = badge, onShare = { onShare(badge) })
+            // 🏆 BADGES
+            items(finalBadges) { badge ->
+                BadgeCard(badge = badge) {
+                    onShare(badge)
                 }
             }
+
+            item { Spacer(Modifier.height(80.dp)) }
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+
+
 @Composable
 fun BadgeCard(badge: Badge, onShare: () -> Unit) {
-    val scale = remember { Animatable(0f) }
-    val confettiVisible = remember { mutableStateOf(false) }
+    val scale = remember { Animatable(0.8f) }
 
     LaunchedEffect(badge.unlocked) {
         if (badge.unlocked) {
-            scale.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(600, easing = FastOutSlowInEasing)
-            )
-            confettiVisible.value = true
+            scale.animateTo(1f, tween(500))
         }
     }
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-
-                // Glow or locked badge background
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .graphicsLayer {
-                            scaleX = scale.value
-                            scaleY = scale.value
-                        }
-                        .clip(CircleShape)
-                        .background(
-                            brush = if (badge.unlocked) Brush.radialGradient(
-                                colors = listOf(Color(0xFFFFD700), Color(0xFFFFA500))
-                            ) else Brush.radialGradient(
-                                colors = listOf(Color.Gray, Color.Gray)
-                            )
-                        )
-                )
-
-                Text(
-                    badge.title,
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                // Confetti effect placeholder
-                if (confettiVisible.value) {
-                    Text("🎉", fontSize = 32.sp, modifier = Modifier.align(Alignment.TopEnd))
-                    // TODO: Replace with actual confetti animation library
-                }
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF121212)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
             }
+    ) {
+        Column(Modifier.padding(16.dp)) {
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(badge.description, style = MaterialTheme.typography.bodyMedium)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = badge.progress,
-                modifier = Modifier.fillMaxWidth()
+            Text(
+                badge.title,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Share button
-            OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                badge.description,
+                color = Color.White.copy(0.7f),
+                fontSize = 13.sp
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            LinearProgressIndicator(
+                progress = badge.progress,
+                color = Color.White,
+                trackColor = Color.White.copy(0.2f)
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedButton(
+                onClick = onShare,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
                 Text("Share")
             }
         }

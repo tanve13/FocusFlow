@@ -16,12 +16,19 @@ class AuthViewModel(
 
     // LOGIN FUNCTION
     fun login(email: String, pass: String, onSuccess: () -> Unit) {
+
+        if (email.isBlank() || pass.isBlank()) {
+            _error.value = "Email or Password cannot be empty"
+            return
+        }
+
         _loading.value = true
         repo.login(email, pass) { ok, msg ->
             _loading.value = false
             if (ok) onSuccess() else _error.value = msg
         }
     }
+
 
     // REGISTER FUNCTION
     fun register(name: String, email: String, pass: String, onSuccess: () -> Unit) {

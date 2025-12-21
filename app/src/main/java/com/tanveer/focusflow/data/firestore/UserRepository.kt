@@ -1,9 +1,17 @@
 package com.tanveer.focusflow.data.firestore
 
+import android.content.Context
+import android.net.Uri
 import com.tanveer.focusflow.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
@@ -32,6 +40,30 @@ class UserRepository @Inject constructor(
     // Update streak and total sessions
     suspend fun updateStreak(uid: String, streak: Int, totalSessions: Int) {
         userDoc(uid).update("streak", streak, "totalSessions", totalSessions).await()
+    }
+    suspend fun uploadProfileImage(context: Context, imageUri: Uri, uid: String): String {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val bytes = inputStream!!.readBytes()
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "file",
+                "image.jpg",
+                bytes.toRequestBody("image/*".toMediaType())
+            )
+            .addFormDataPart("upload_preset", "upload_preset") // tumhara preset
+            .addFormDataPart("folder", "focusflow") // optional
+            .build()
+
+        val request = Request.Builder()
+            .url("https://api.cloudinary.com/v1_1/dyeywm7b5/image/upload")
+            .post(requestBody)
+            .build()
+
+        val response = OkHttpClient().newCall(request).execute()
+        val json = JSONObject(response.body!!.string())
+        return json.getString("secure_url")
     }
 
     // Logout the current user
