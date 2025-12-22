@@ -51,6 +51,23 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+    fun updateDurations(focusMin: Int, breakMin: Int) {
+        _focusDurationSec = focusMin * 60
+        _breakDurationSec = breakMin * 60
+
+        if (!_isRunning.value) {
+            if (_isFocusMode.value) {
+                totalSec = _focusDurationSec!!
+                _timeLeftSec.value = totalSec
+            } else {
+                totalSec = _breakDurationSec!!
+                _timeLeftSec.value = totalSec
+            }
+        }
+    }
+    fun currentFocusSec(): Int = _focusDurationSec ?: 25 * 60
+    fun currentBreakSec(): Int = _breakDurationSec ?: 5 * 60
+
 
     fun toggleStartStop() {
         if (_isRunning.value) stopTimer() else startTimer()
@@ -114,34 +131,8 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    fun currentFocusSec(): Int {
-        // return focus duration in seconds from SettingDataStore or cached value
-        return _focusDurationSec ?: 25*60 // define _focusDurationSec var
-    }
-
-    fun currentBreakSec(): Int = _breakDurationSec ?: 5*60
-
     private var _focusDurationSec: Int? = null
     private var _breakDurationSec: Int? = null
 
-    init {
-        viewModelScope.launch {
-            settings.focusDurationFlow.collect { minutes ->
-                _focusDurationSec = minutes * 60
-                if (_isFocusMode.value) {
-                    totalSec = _focusDurationSec ?: (25*60)
-                    _timeLeftSec.value = totalSec
-                }
-            }
-        }
-        viewModelScope.launch {
-            settings.breakDurationFlow.collect { minutes ->
-                _breakDurationSec = minutes * 60
-                if (!_isFocusMode.value) {
-                    totalSec = _breakDurationSec ?: (5*60)
-                    _timeLeftSec.value = totalSec
-                }
-            }
-        }
-    }
+
 }

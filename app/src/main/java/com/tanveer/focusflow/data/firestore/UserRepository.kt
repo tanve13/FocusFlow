@@ -2,9 +2,11 @@ package com.tanveer.focusflow.data.firestore
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.tanveer.focusflow.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -21,11 +23,6 @@ class UserRepository @Inject constructor(
 
     private fun userDoc(uid: String) = db.collection("users").document(uid)
 
-    // Create or overwrite user
-    suspend fun upsertUser(user: User) {
-        userDoc(user.uid).set(user).await()
-    }
-
     // Get user data
     suspend fun getUser(uid: String): User? {
         val snap = userDoc(uid).get().await()
@@ -41,29 +38,15 @@ class UserRepository @Inject constructor(
     suspend fun updateStreak(uid: String, streak: Int, totalSessions: Int) {
         userDoc(uid).update("streak", streak, "totalSessions", totalSessions).await()
     }
-    suspend fun uploadProfileImage(context: Context, imageUri: Uri, uid: String): String {
-        val inputStream = context.contentResolver.openInputStream(imageUri)
-        val bytes = inputStream!!.readBytes()
 
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart(
-                "file",
-                "image.jpg",
-                bytes.toRequestBody("image/*".toMediaType())
+    suspend fun updateProfileImage(uid: String, photoUrl: String) {
+        db.collection("users")
+            .document(uid)
+            .set(
+                mapOf("photoUrl" to photoUrl),
+                SetOptions.merge()
             )
-            .addFormDataPart("upload_preset", "upload_preset") // tumhara preset
-            .addFormDataPart("folder", "focusflow") // optional
-            .build()
-
-        val request = Request.Builder()
-            .url("https://api.cloudinary.com/v1_1/dyeywm7b5/image/upload")
-            .post(requestBody)
-            .build()
-
-        val response = OkHttpClient().newCall(request).execute()
-        val json = JSONObject(response.body!!.string())
-        return json.getString("secure_url")
+            .await()
     }
 
     // Logout the current user

@@ -17,7 +17,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomItem(Screen.Home.route, Icons.Default.Timer, "Home"),
         BottomItem(Screen.Tasks.route, Icons.Default.List, "Tasks"),
-        BottomItem(Screen.Notes.route, Icons.Default.Note, "Notes"),
+        BottomItem(Screen.Notification.route, Icons.Default.Notifications, "Notification"),
         BottomItem(Screen.Insights.route, Icons.Default.BarChart, "Insights")
     )
 

@@ -21,21 +21,39 @@ class InsightsViewModel @Inject constructor() : ViewModel() {
 
     private val _weeklyData = MutableStateFlow<List<WeeklyData>>(emptyList())
     val weeklyData: StateFlow<List<WeeklyData>> = _weeklyData
+    private val _streak = MutableStateFlow(0)
+    val streak: StateFlow<Int> = _streak
+    private fun calculateStreak(data: List<WeeklyData>): Int {
+        var currentStreak = 0
+
+        // assume last item = today
+        for (day in data.reversed()) {
+            if (day.sessions > 0) {
+                currentStreak++
+            } else {
+                break
+            }
+        }
+        return currentStreak
+    }
 
     fun loadData(uid: String) {
         viewModelScope.launch {
             // TODO: Replace with Firestore query/aggregation
             _dailySessions.value = 3
             _dailyTasksCompleted.value = 5
-            _weeklyData.value = listOf(
+            val week = listOf(
                 WeeklyData("Mon", 2),
                 WeeklyData("Tue", 4),
                 WeeklyData("Wed", 3),
                 WeeklyData("Thu", 6),
                 WeeklyData("Fri", 7),
                 WeeklyData("Sat", 4),
-                WeeklyData("Sun", 5)
+                WeeklyData("Sun", 5) // today
             )
+
+            _weeklyData.value = week
+            _streak.value = calculateStreak(week)
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.tanveer.focusflow.viewModel.ProfileViewModel
 import com.tanveer.focusflow.R
 
@@ -34,13 +35,15 @@ fun ProfileScreen(
     val user by vm.user.collectAsState()
     var showEditDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
     val imagePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let { vm.uploadProfileImage(context, it, uid) }
     }
 
-    LaunchedEffect(Unit) { vm.loadUser(uid) }
+    LaunchedEffect(uid) { vm.loadUser(uid) }
 
     Scaffold(
         topBar = {

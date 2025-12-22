@@ -9,7 +9,8 @@ data class Task(
     val priority: Priority = Priority.MEDIUM,
     val dueAt: Timestamp? = null,
     val completed: Boolean = false,
-    val createdAt: Timestamp? = null
+    val createdAt: Timestamp? = null,
+    val deadline: Long? = null // timestamp in millis
 )
 
 enum class Priority { HIGH, MEDIUM, LOW }

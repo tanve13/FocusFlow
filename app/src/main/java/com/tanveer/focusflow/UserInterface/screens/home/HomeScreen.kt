@@ -29,6 +29,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.navigation.NavHostController
 import com.tanveer.focusflow.ui.components.SideSlider
+import com.tanveer.focusflow.viewModel.TimerSettingsViewModel
 
 @Composable
 fun HomeScreen(
@@ -36,6 +37,15 @@ fun HomeScreen(
     onOpenMusic: () -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+     val timerVM: TimerSettingsViewModel = hiltViewModel()
+    val focusMinutes by timerVM.focusMinutes.collectAsState(initial = 25)
+    val breakMinutes by timerVM.breakMinutes.collectAsState(initial = 5)
+
+    val focusTimeMillis = focusMinutes * 60 * 1000L
+    val breakTimeMillis = breakMinutes * 60 * 1000L
+
+    Text("Focus: $focusMinutes min")
+    Text("Break: $breakMinutes min")
     val colors = MaterialTheme.colorScheme
     val isRunning by homeViewModel.isRunning.collectAsState()
     val isFocus by homeViewModel.isFocusMode.collectAsState()

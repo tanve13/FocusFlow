@@ -22,14 +22,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.tanveer.focusflow.viewModel.HomeViewModel
+import com.tanveer.focusflow.viewModel.TimerSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navBack: () -> Unit) {
 
     // ------------------------ STATES ------------------------
-    var focusMinutes by remember { mutableStateOf(25f) }
-    var breakMinutes by remember { mutableStateOf(5f) }
+    val timerVM: TimerSettingsViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
+
+    val focusMinutes by timerVM.focusMinutes.collectAsState(initial = 25)
+    val breakMinutes by timerVM.breakMinutes.collectAsState(initial = 5)
 
     var soundEnabled by remember { mutableStateOf(true) }
     var selectedSound by remember { mutableStateOf("Rain") }
@@ -43,18 +49,7 @@ fun SettingsScreen(navBack: () -> Unit) {
     val soundOptions = listOf("Rain", "Wind", "Fireplace", "Forest", "White Noise")
     val themeOptions = listOf("Light", "Dark", "System Default")
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = navBack) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Scaffold() { padding ->
 
         Column(
             Modifier
@@ -93,22 +88,31 @@ fun SettingsScreen(navBack: () -> Unit) {
 
             // ---------------- TIMER CARD ----------------
             SettingsCard(title = "Timer Duration") {
+                var tempFocus by remember { mutableStateOf(focusMinutes.toFloat()) }
+                var tempBreak by remember { mutableStateOf(breakMinutes.toFloat()) }
 
                 Text("Focus Duration: ${focusMinutes.toInt()} min")
                 Slider(
-                    value = focusMinutes,
-                    onValueChange = { focusMinutes = it },
+                    value = tempFocus,
+                    onValueChange = { tempFocus = it },
+                    onValueChangeFinished = {
+                        timerVM.setFocusMinutes(tempFocus.toInt())
+                    },
                     valueRange = 10f..60f
                 )
 
                 Spacer(Modifier.height(12.dp))
 
-                Text("Break Duration: ${breakMinutes.toInt()} min")
+                        Text("Break Duration: ${tempBreak.toInt()} min")
                 Slider(
-                    value = breakMinutes,
-                    onValueChange = { breakMinutes = it },
+                    value = tempBreak,
+                    onValueChange = { tempBreak = it },
+                    onValueChangeFinished = {
+                        timerVM.setBreakMinutes(tempBreak.toInt())
+                    },
                     valueRange = 3f..30f
                 )
+
             }
 
             Spacer(Modifier.height(16.dp))
@@ -213,6 +217,9 @@ fun SettingsCard(title: String, content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White   // ✅ WHITE CARD
+        ),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(Modifier.padding(16.dp)) {

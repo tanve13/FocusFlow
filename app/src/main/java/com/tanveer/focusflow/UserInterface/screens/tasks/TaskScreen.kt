@@ -1,7 +1,6 @@
 package com.tanveer.focusflow.UserInterface.screens.tasks
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,19 +13,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tanveer.focusflow.data.model.Task
+import com.tanveer.focusflow.viewModel.NotificationViewModel
 import com.tanveer.focusflow.viewModel.TaskViewModel
 
 @Composable
 fun TaskScreen(
     vm: TaskViewModel = hiltViewModel(),
     uid: String = "current_uid",
-    onEditTask: (Task) -> Unit = {}
+    onEditTask: (Task) -> Unit = {},
 ) {
+    val notificationViewModel: NotificationViewModel = hiltViewModel()
     val tasks by vm.tasks.collectAsState()
     LaunchedEffect(Unit) { vm.loadTasks(uid) }
 
@@ -82,10 +83,15 @@ fun TaskScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(filteredTasks) { task ->
-                    TaskCard(task = task, onToggle = { vm.updateTask(uid, task.copy(completed = !task.completed)) },
-                        onEdit = { taskToEdit = task},
-                       // onDelete = { vm.deleteTask(uid, task.id) })
-                        onDelete = { taskToDelete = task })
+                    TaskCard(
+                        task = task,
+                        vm = notificationViewModel,
+                        onEdit = { taskToEdit = task },
+                        onDelete = { taskToDelete = task },
+                        onTaskChecked = { updatedTask ->
+                            vm.updateTask(uid, updatedTask)
+                        }
+                    )
                 }
             }
 
@@ -145,50 +151,63 @@ fun TaskScreen(
 @Composable
 fun TaskCard(
     task: Task,
-    onToggle: (Task) -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onTaskChecked: (Task) -> Unit,
+    vm: NotificationViewModel
 ) {
-    val strikeThrough = if (task.completed) TextDecoration.LineThrough else null
-    val background = if (task.completed) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+    val context = LocalContext.current
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // fixed low elevation
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = task.completed,
-                    onCheckedChange = { onToggle(task) }
-                )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(task.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (task.completed) Color.Gray else Color.Black,textDecoration = strikeThrough)
-                    if (task.description.isNotBlank())
-                        Text(task.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            textDecoration = strikeThrough,
-                            maxLines = 2)
-                    if (task.completed) Text("🎉 Completed!", color = MaterialTheme.colorScheme.primary)
+
+            // ✅ CHECKBOX
+            Checkbox(
+                checked = task.completed,
+                onCheckedChange = {checked ->
+                    onTaskChecked(task.copy(completed = checked))
+
+                    vm.notifyTaskStatus(
+                        task.copy(completed = checked),
+                        context
+                    )
                 }
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // ✅ TASK TITLE
+            Text(
+                task.title,
+                modifier = Modifier.weight(1f)
+            )
+
+            // ✏️ EDIT
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit")
             }
-            Row {
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit Task") }
-                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete Task", tint = Color.Red) }
+
+            // 🗑 DELETE
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Red
+                )
             }
         }
     }
 }
+
 
 
 @Composable

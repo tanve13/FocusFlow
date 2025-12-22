@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".MyApp.MyApp"
@@ -13,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FocusFlow"
         tools:targetApi="31">
+        <meta-data
+            android:name="onesignal_app_id"
+            android:value="702ad09c-aa3f-4b52-bff4-4f34a24117fb"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

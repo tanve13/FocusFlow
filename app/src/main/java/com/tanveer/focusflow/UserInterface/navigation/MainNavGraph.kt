@@ -13,9 +13,9 @@ import com.tanveer.focusflow.UserInterface.navigation.Screen
 import com.tanveer.focusflow.UserInterface.screens.achievements.AchievementScreen
 import com.tanveer.focusflow.UserInterface.screens.home.HomeScreen
 import com.tanveer.focusflow.UserInterface.screens.tasks.TaskScreen
-import com.tanveer.focusflow.UserInterface.screens.notes.NotesScreen
 import com.tanveer.focusflow.UserInterface.screens.insights.InsightsScreen
 import com.tanveer.focusflow.UserInterface.screens.music.AmbientSoundScreen
+import com.tanveer.focusflow.UserInterface.screens.notifications.NotificationScreen
 import com.tanveer.focusflow.UserInterface.screens.profile.EditProfileScreen
 import com.tanveer.focusflow.UserInterface.screens.profile.ProfileScreen
 import com.tanveer.focusflow.UserInterface.screens.settings.SettingsScreen
@@ -69,7 +69,7 @@ fun MainNavGraph(navController: NavHostController) {
                 )
             }
             composable(Screen.Tasks.route) { TaskScreen(uid = "current_uid") }
-            composable(Screen.Notes.route) { NotesScreen(uid = "current_uid") }
+            composable(Screen.Notification.route) { NotificationScreen() }
             composable(Screen.Insights.route) { InsightsScreen() }
             composable(Screen.Music.route) { AmbientSoundScreen(onBack = { innerNavController.popBackStack() }) }
         }

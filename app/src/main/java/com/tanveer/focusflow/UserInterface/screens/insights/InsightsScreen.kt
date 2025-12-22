@@ -1,7 +1,6 @@
 package com.tanveer.focusflow.UserInterface.screens.insights
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,10 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,125 +17,160 @@ import com.tanveer.focusflow.viewModel.InsightsViewModel
 import com.tanveer.focusflow.viewModel.WeeklyData
 
 @Composable
-fun InsightsScreen(vm: InsightsViewModel = viewModel(), uid: String = "current_uid") {
+fun InsightsScreen(
+    vm: InsightsViewModel = viewModel(),
+    uid: String = "current_uid"
+) {
     val sessions by vm.dailySessions.collectAsState()
     val tasksCompleted by vm.dailyTasksCompleted.collectAsState()
     val weeklyData by vm.weeklyData.collectAsState()
+    val streak by vm.streak.collectAsState(initial = 0)
 
-    // Load mock data for now
-    LaunchedEffect(Unit) { vm.loadData(uid) }
+    LaunchedEffect(uid) { vm.loadData(uid) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text("Insights", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        StatsCard(
-            title = "Today's Focus Sessions",
-            value = sessions.toString(),
-            gradient = Brush.horizontalGradient(listOf(Color(0xFF6C63FF), Color(0xFF9D5CFF)))
+        Text(
+            "Insights",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
-        StatsCard(
-            title = "Tasks Completed Today",
-            value = tasksCompleted.toString(),
-            gradient = Brush.horizontalGradient(listOf(Color(0xFF42A5F5), Color(0xFF478DE0)))
+        // 🔥 STREAK CARD
+        StreakCard(streak)
+
+        Spacer(Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatsCardBW(
+                title = "Focus Sessions",
+                value = sessions.toString()
+            )
+            StatsCardBW(
+                title = "Tasks Done",
+                value = tasksCompleted.toString()
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text(
+            "Weekly Focus",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
 
-        Text("Weekly Focus Progress", style = MaterialTheme.typography.titleMedium)
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        WeeklyGraph(
-            data = weeklyData,
-            barColor = Color(0xFF6C63FF)
-        )
+        WeeklyGraphBW(weeklyData)
     }
 }
-
 @Composable
-fun StatsCard(title: String, value: String, gradient: Brush) {
+fun StreakCard(streak: Int) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        )
     ) {
-        Box(
-            modifier = Modifier
-                .background(gradient)
-                .padding(20.dp)
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                "🔥",
+                fontSize = 32.sp
+            )
+            Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
+                    "Current Streak",
+                    color = Color.White.copy(0.7f),
+                    style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = value,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    "$streak days",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
     }
 }
-
 @Composable
-fun WeeklyGraph(
-    data: List<WeeklyData>,
-    barColor: Color = Color(0xFF6C63FF)
-) {
-    val maxValue = data.maxOfOrNull { it.sessions }?.toFloat() ?: 1f
-    val barWidthDp = 24.dp
-    val spacingDp = 16.dp
+fun StatsCardBW(title: String, value: String) {
+    Card(
+        modifier = Modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(0.6f)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                value,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+@Composable
+fun WeeklyGraphBW(data: List<WeeklyData>) {
+    val max = data.maxOfOrNull { it.sessions }?.toFloat() ?: 1f
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+            .height(180.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom
     ) {
         data.forEach { item ->
-            val animatedHeight = animateFloatAsState(
-                targetValue = item.sessions / maxValue,
+            val heightRatio by animateFloatAsState(
+                targetValue = item.sessions / max,
                 label = ""
-            ).value
+            )
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                // Bar
                 Box(
                     modifier = Modifier
-                        .height(160.dp * animatedHeight)
-                        .width(barWidthDp)
+                        .width(20.dp)
+                        .height(140.dp * heightRatio)
                         .background(
-                            color = barColor,
-                            shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
+                            Color.Black,
+                            RoundedCornerShape(6.dp)
                         )
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Day label
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    text = item.day,
-                    style = MaterialTheme.typography.bodySmall
+                    item.day,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(0.6f)
                 )
             }
         }
     }
 }
+
