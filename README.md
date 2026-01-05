@@ -33,7 +33,6 @@ The app is built using **Kotlin and Jetpack Compose** with a **Firebase backend*
 
 ### 🏆 Achievements & Badges
 - Unlock badges based on focus sessions
-- Motivation through gamification
 - Streak-based rewards
 
 ### 📊 Insights & Analytics
