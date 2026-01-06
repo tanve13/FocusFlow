@@ -55,7 +55,7 @@ The app is built using **Kotlin and Jetpack Compose** with a **Firebase backend*
 - **Cloudinary** (Profile photo upload)
 - **OneSignal** (Push notifications)
 
----
+  
 
 
 
