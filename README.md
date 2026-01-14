@@ -1,6 +1,6 @@
-# 🚀 Focus Flow App
+# 🚀 FocusFlow App
 
-Focus Flow is a modern **productivity and focus management Android application** designed to help users improve concentration, manage tasks efficiently, and build consistent focus habits.  
+FocusFlow is a modern **productivity and focus management Android application** designed to help users improve concentration, manage tasks efficiently, and build consistent focus habits.  
 The app is built using **Kotlin and Jetpack Compose** with a **Firebase backend**, providing a clean UI, secure authentication, and productivity insights.
 
 ---
