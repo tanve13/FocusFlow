@@ -42,7 +42,7 @@ The app is built using **Kotlin and Jetpack Compose** with a **Firebase backend*
 
 ---
 
-## 🛠️ Tech Stack
+### 🛠️ Tech Stack
 
 - **Language:** Kotlin  
 - **UI:** Jetpack Compose  
